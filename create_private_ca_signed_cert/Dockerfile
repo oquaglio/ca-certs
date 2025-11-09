@@ -73,7 +73,8 @@ RUN echo "Running openssl ca..." && \
     ls -l /ca/certs/ /ca/newcerts/ && \
     [ -s /ca/certs/ca.crt ] || { echo "Error: ca.crt is missing or empty"; exit 1; } && \
     [ -s /ca/certs/server.crt ] || { echo "Error: server.crt is missing or empty"; cat /tmp/openssl_ca.log /ca/index.txt /ca/serial; exit 1; } && \
-    echo "Server certificate created"
+    [ -s /ca/private/server.key ] || { echo "Error: server.key is missing or empty"; exit 1; } && \
+    echo "Server certificate and key created"
 
-# Create output directory and copy certificates at runtime
-CMD ["bash", "-c", "mkdir -p /output && [ -s /ca/certs/ca.crt ] && [ -s /ca/certs/server.crt ] && cp -v /ca/certs/ca.crt /ca/certs/server.crt /output/ && chmod 644 /output/*.crt || { echo 'Error: Certificates missing or copy failed'; cat /tmp/openssl_ca.log /ca/index.txt /ca/serial; exit 1; } && ls -l /ca/certs/ /ca/newcerts/ /output/ && cat /ca/certs/ca.crt /ca/certs/server.crt"]
+# Create output directory and copy certificates and server key at runtime
+CMD ["bash", "-c", "mkdir -p /output && [ -s /ca/certs/ca.crt ] && [ -s /ca/certs/server.crt ] && [ -s /ca/private/server.key ] && cp -v /ca/certs/ca.crt /ca/certs/server.crt /ca/private/server.key /output/ && chmod 644 /output/* || { echo 'Error: Certificates or key missing or copy failed'; cat /tmp/openssl_ca.log /ca/index.txt /ca/serial; exit 1; } && ls -l /ca/certs/ /ca/newcerts/ /ca/private/ /output/ && cat /ca/certs/ca.crt /ca/certs/server.crt /ca/private/server.key"]
