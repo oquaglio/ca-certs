@@ -54,5 +54,8 @@ EOF
 RUN openssl ca -batch -config /tmp/openssl.cnf \
     -in /ca/server.csr -out /ca/certs/server.crt -days 365
 
-# Output the certs for inspection (in real use, copy them out)
+# Copy certificates to the local directory
+COPY /ca/certs/ca.crt /ca/certs/server.crt ./
+
+# Output the certs for inspection (optional, kept for verification)
 CMD ["bash", "-c", "cat /ca/certs/ca.crt /ca/certs/server.crt"]
