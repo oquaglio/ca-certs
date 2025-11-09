@@ -29,7 +29,7 @@ RUN openssl req -nodes -newkey rsa:2048 \
     openssl req -in /ca/server.csr -text -noout && \
     echo "Server CSR created"
 
-# Create OpenSSL configuration file
+# Create OpenSSL configuration file with extensions
 RUN cat <<EOF > /tmp/openssl.cnf
 [ca]
 default_ca = CA_default
@@ -48,6 +48,7 @@ default_days = 365
 default_md = sha256
 preserve = no
 policy = policy_anything
+x509_extensions = v3_server
 
 [policy_anything]
 countryName = optional
@@ -57,6 +58,12 @@ organizationName = optional
 organizationalUnitName = optional
 commonName = supplied
 emailAddress = optional
+
+[v3_server]
+basicConstraints = CA:FALSE
+keyUsage = digitalSignature, keyEncipherment
+extendedKeyUsage = serverAuth
+subjectAltName = DNS:server.example.com
 EOF
 
 # Sign the CSR with the CA and verify output
