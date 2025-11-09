@@ -1,5 +1,7 @@
 #
 
+Generate a private CA certificate, a server certificate signed by the CA, and the server’s private key, then copy these files (ca.crt, server.crt, server.key) to a local output/ directory using a volume mount when the container runs.
+
 ```sh
 docker builder prune --all
 mkdir -p output
