@@ -1,13 +1,25 @@
-#
+# Custom CA in a client container
 
-    Copy a custom CA certificate (ca.crt) from ../dir/output/ into the container, add it to the system’s trusted CA store, and use curl to test an HTTPS connection to a server (e.g., https://server.example.com) that relies on this CA for trust verification.
+Copies the `ca.crt` produced by [`create_private_ca_signed_cert`](../create_private_ca_signed_cert)
+into the container, adds it to the system trust store with `update-ca-certificates`, and
+uses `curl` to reach an HTTPS server that relies on that CA.
 
 ```sh
-cd ..
-docker build --no-cache -t curl-with-ca -f custom_ca_in_client_container/Dockerfile .
-docker run --rm curl-with-ca
+just client-verify   # build and show the CA installed in the trust store
+just client-run      # run the image's default `curl https://server.example.com`
 ```
 
+Run from the repo root. `client-build` depends on the `ca` recipe, so the CA certs are
+generated first if they're missing. The build context is the repo root, because the
+Dockerfile reads `create_private_ca_signed_cert/output/ca.crt`.
+
+`client-run` only succeeds if `server.example.com` actually resolves to a host presenting
+the cert from example 2. `client-verify` demonstrates the trust store change without
+needing that server.
+
+Raw equivalent (from the repo root):
+
 ```sh
-docker run --rm -v $(pwd)/../dir/output/ca.crt:/mnt/ca.crt curl-with-ca
+docker build --no-cache -t curl-with-ca -f custom_ca_in_client_container/Dockerfile .
+docker run --rm curl-with-ca
 ```
