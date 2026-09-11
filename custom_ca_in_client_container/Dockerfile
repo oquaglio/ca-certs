@@ -10,4 +10,4 @@ COPY create_private_ca_signed_cert/output/ca.crt /usr/local/share/ca-certificate
 RUN update-ca-certificates
 
 # Test curl against a server using the custom CA (replace URL with your test server)
-CMD ["curl", "https://server.example.com"]
+CMD ["curl", "https://api.bluemeridian.example"]

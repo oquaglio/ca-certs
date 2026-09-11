@@ -14,13 +14,13 @@ RUN mkdir -p /ca/certs /ca/private /ca/crl /ca/newcerts && \
 RUN openssl req -x509 -nodes -days 3650 -newkey rsa:4096 \
     -keyout /ca/private/ca.key \
     -out /ca/certs/ca.crt \
-    -subj "/C=US/ST=State/L=City/O=MyCA/CN=MyRootCA"
+    -subj "/C=AU/ST=New South Wales/L=Sydney/O=Blue Meridian Systems/OU=Certificate Authority/CN=Blue Meridian Root CA"
 
 # Generate server key and CSR
 RUN openssl req -nodes -newkey rsa:2048 \
     -keyout /ca/private/server.key \
     -out /ca/server.csr \
-    -subj "/C=US/ST=State/L=City/O=Organization/CN=server.example.com"
+    -subj "/C=AU/ST=New South Wales/L=Sydney/O=Blue Meridian Systems/OU=Platform Engineering/CN=api.bluemeridian.example"
 
 # Create OpenSSL configuration file
 RUN cat <<EOF > /tmp/openssl.cnf

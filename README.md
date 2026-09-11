@@ -9,6 +9,20 @@ certificates: making one, signing one with your own CA, and getting a client to 
 | 2. Private CA-signed cert | [`create_private_ca_signed_cert/`](create_private_ca_signed_cert) | Act as your own CA and sign a server cert |
 | 3. Custom CA in a client | [`custom_ca_in_client_container/`](custom_ca_in_client_container) | Install that CA into a container's trust store |
 
+## Certificate identities
+
+All three examples use one fictional company, **Blue Meridian Systems**, so the CA, the
+server cert and the client trust store visibly line up:
+
+| Cert | Subject |
+| --- | --- |
+| Self-signed (example 1) | `C=AU, ST=New South Wales, L=Sydney, O=Blue Meridian Systems, OU=Platform Engineering, CN=shop.bluemeridian.example` |
+| Root CA (example 2) | `C=AU, ST=New South Wales, L=Sydney, O=Blue Meridian Systems, OU=Certificate Authority, CN=Blue Meridian Root CA` |
+| Server, CA-signed (example 2) | `C=AU, ST=New South Wales, L=Sydney, O=Blue Meridian Systems, OU=Platform Engineering, CN=api.bluemeridian.example` |
+
+The hostnames sit under the reserved `.example` TLD (RFC 2606), so they can never collide
+with a real domain. Change the `-subj` strings in each Dockerfile to use your own.
+
 ## Requirements
 
 - Docker
@@ -57,13 +71,13 @@ real.
 
 ```sh
 just client-verify  # build the client and show the CA in its trust store
-just client-run     # run the image's default `curl https://server.example.com`
+just client-run     # run the image's default `curl https://api.bluemeridian.example`
 ```
 
 `client-build` depends on `ca`, so the CA certs are regenerated automatically if missing.
 The image is built from the repo root because its Dockerfile reads `ca.crt` out of
 example 2's output directory.
 
-`just client-run` will fail to resolve `server.example.com` unless you actually have a
+`just client-run` will fail to resolve `api.bluemeridian.example` unless you actually have a
 host by that name presenting the cert from example 2 — `client-verify` is the recipe that
 demonstrates the trust store change on its own.

@@ -37,7 +37,7 @@ nginx-test: nginx-run
 
 # Print the cert nginx is presenting
 nginx-show:
-    openssl s_client -connect localhost:{{ nginx_port }} -servername example.com </dev/null 2>/dev/null \
+    openssl s_client -connect localhost:{{ nginx_port }} -servername shop.bluemeridian.example </dev/null 2>/dev/null \
       | openssl x509 -noout -subject -issuer -dates
 
 # Stop and remove the nginx container
@@ -58,16 +58,21 @@ ca: ca-build
         echo "certs already present in {{ ca_out }} (use \`just ca-force\` to regenerate)"
         exit 0
     fi
-    mkdir -p "{{ ca_out }}"
-    docker run --rm -v "{{ ca_out }}":/output {{ ca_image }} \
-      bash -c 'cp /ca/certs/ca.crt /ca/certs/server.crt /ca/private/server.key /output/ && chmod 644 /output/*'
-    ls -l "{{ ca_out }}"
+    just _ca-export
 
 # Discard existing certs and generate a brand new CA and server cert
 ca-force:
     rm -rf {{ ca_out }}
     docker build --no-cache -t {{ ca_image }} {{ ca_dir }}
-    @just ca
+    @just _ca-export
+
+# Copy the certs out of the image into ./output (no rebuild, no guard)
+[private]
+_ca-export:
+    mkdir -p {{ ca_out }}
+    docker run --rm -v {{ ca_out }}:/output {{ ca_image }} \
+      bash -c 'cp /ca/certs/ca.crt /ca/certs/server.crt /ca/private/server.key /output/ && chmod 644 /output/*'
+    @ls -l {{ ca_out }}
 
 # Verify server.crt chains to ca.crt
 ca-verify: ca
@@ -88,7 +93,7 @@ client-verify: client-build
     docker run --rm {{ client_image }} \
       bash -c 'ls -l /etc/ssl/certs | grep -i custom-ca && openssl x509 -in /usr/local/share/ca-certificates/custom-ca.crt -noout -subject -issuer'
 
-# Run the client's default curl against https://server.example.com (fails without such a host)
+# Run the client's default curl against https://api.bluemeridian.example (fails without such a host)
 client-run: client-build
     docker run --rm {{ client_image }}
 

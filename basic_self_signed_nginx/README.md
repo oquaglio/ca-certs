@@ -3,6 +3,9 @@
 Generates a self-signed certificate at image build time and configures nginx to serve
 HTTPS with it.
 
+The cert is issued to `CN=shop.bluemeridian.example` (`O=Blue Meridian Systems`), and nginx's
+`server_name` matches it.
+
 ```sh
 just nginx-run     # build and serve on https://localhost:8443/
 just nginx-test    # curl -k against it, expect HTTP 200
